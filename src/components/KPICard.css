@@ -1,0 +1,27 @@
+.kpi-card {
+  background: #fffffe;
+  padding: 2rem;
+  margin: 10px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  border: 1px solid #ebebeb;
+}
+
+.kpi-title {
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+.kpi-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+.kpi-value {
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.kpi-subtitle {
+  margin-top: 0.5rem;
+}

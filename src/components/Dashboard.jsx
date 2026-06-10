@@ -4,6 +4,9 @@ import { energyData } from "../data/energy";
 import KPICard from "./KPICard";
 import "./Dashboard.css";
 import { getKPIMetrics } from "../utils/energyHelper";
+import ResponsiveStackedAreaChart from "./charts/ResponsiveStackedAreaChart";
+import { getStackedAreaData } from "../utils/energyHelper";
+import ResponsiveDonutChart from "./charts/ResponsiveDonutChart";
 
 export default function Dashboard() {
   const countries = useMemo(() => {
@@ -29,8 +32,13 @@ export default function Dashboard() {
         nuclearPct: null,
         fossilFuelPct: null,
       };
+  // Get the time series data for the selected country
+  const countryData = energyData.filter((d) => d.country === selectedCountry);
+  // Transform the data for the stacked area chart
+  const stackedAreaData = getStackedAreaData(countryData);
+
   return (
-    <div className="min-h-screen bg-gray-50 dashboard shadow-lg space-y-8">
+    <div className="min-h-screen bg-gray-50 dashboard shadow-lg">
       <div className="max-w-7xl mx-auto px-8 py-4">
         <DashboardHeader
           countries={countries}
@@ -40,7 +48,7 @@ export default function Dashboard() {
       </div>
       <div className="kpi-grid mt-8">
         <KPICard
-          title="2024 TOTAL PRIMARY ENERGY"
+          title="TOTAL PRIMARY ENERGY 2024"
           name={selectedCountry}
           value={
             metrics.primaryEnergy !== null
@@ -51,7 +59,7 @@ export default function Dashboard() {
         />
 
         <KPICard
-          title="RENEWABLE ENERGY"
+          title="RENEWABLE ENERGY 2024"
           name={selectedCountry}
           value={
             metrics.renewablePct !== null
@@ -62,7 +70,7 @@ export default function Dashboard() {
         />
 
         <KPICard
-          title="NUCLEAR ENERGY"
+          title="NUCLEAR ENERGY 2024"
           name={selectedCountry}
           value={
             metrics.nuclearPct !== null
@@ -73,7 +81,7 @@ export default function Dashboard() {
         />
 
         <KPICard
-          title="FOSSIL FUELS"
+          title="FOSSIL FUELS 2024"
           name={selectedCountry}
           value={
             metrics.fossilFuelPct !== null
@@ -82,6 +90,17 @@ export default function Dashboard() {
           }
           subtitle="coal+oil+gas"
         />
+      </div>
+      <div className="max-w-7xl mx-auto px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <ResponsiveStackedAreaChart data={stackedAreaData} />
+          </div>
+
+          <div>
+            <ResponsiveDonutChart country={selectedCountry} />
+          </div>
+        </div>
       </div>
     </div>
   );

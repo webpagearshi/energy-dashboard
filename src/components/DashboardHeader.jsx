@@ -27,8 +27,8 @@ export default function DashboardHeader({
             setSelectedCountry={setSelectedCountry}
           />
 
-          <div className="mt-1 text-[14px] text-gray-500">
-            Dataset Period: 1965–2024
+          <div className="mt-1 text-[12px] text-gray-500">
+            Dataset Period: 1965–2024 <br /> Source: Our World in Data
           </div>
         </div>
       </div>

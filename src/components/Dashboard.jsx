@@ -20,17 +20,15 @@ export default function Dashboard() {
   const country2024 = energyData.find(
     (d) => d.country === selectedCountry && d.year === 2024,
   );
-  // If there's no data for 2024, we can show a message or fallback to the latest available year
-  if (!country2024) {
-    return (
-      <div className="p-6 text-center text-gray-300 text-sm">
-        No 2024 data available for {selectedCountry}
-      </div>
-    );
-  }
-  // Calculate the KPI metrics for the selected country in 2024
-  const metrics = getKPIMetrics(country2024);
-
+  // Handle case where data for 2024 might not be available
+  const metrics = country2024
+    ? getKPIMetrics(country2024)
+    : {
+        primaryEnergy: null,
+        renewablePct: null,
+        nuclearPct: null,
+        fossilFuelPct: null,
+      };
   return (
     <div className="min-h-screen bg-gray-50 dashboard shadow-lg space-y-8">
       <div className="max-w-7xl mx-auto px-8 py-4">
@@ -44,28 +42,44 @@ export default function Dashboard() {
         <KPICard
           title="2024 TOTAL PRIMARY ENERGY"
           name={selectedCountry}
-          value={metrics.primaryEnergy.toFixed(1)}
+          value={
+            metrics.primaryEnergy !== null
+              ? metrics.primaryEnergy.toFixed(1)
+              : "No Data"
+          }
           subtitle="consumption measured in TWh"
         />
 
         <KPICard
           title="RENEWABLE ENERGY"
           name={selectedCountry}
-          value={`${metrics.renewablePct.toFixed(1)}%`}
+          value={
+            metrics.renewablePct !== null
+              ? `${metrics.renewablePct.toFixed(1)}%`
+              : "No Data"
+          }
           subtitle="% of total energy consumption"
         />
 
         <KPICard
           title="NUCLEAR ENERGY"
           name={selectedCountry}
-          value={`${metrics.nuclearPct.toFixed(1)}%`}
+          value={
+            metrics.nuclearPct !== null
+              ? `${metrics.nuclearPct.toFixed(1)}%`
+              : "No Data"
+          }
           subtitle="% of total energy consumption"
         />
 
         <KPICard
           title="FOSSIL FUELS"
           name={selectedCountry}
-          value={`${metrics.fossilFuelPct.toFixed(1)}%`}
+          value={
+            metrics.fossilFuelPct !== null
+              ? `${metrics.fossilFuelPct.toFixed(1)}%`
+              : "No Data"
+          }
           subtitle="coal+oil+gas"
         />
       </div>

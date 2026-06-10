@@ -10,7 +10,7 @@ export default function DashboardHeader({
       <div className="flex w-full justify-between items-start">
         {/* Left Side */}
         <div className="flex flex-col">
-          <h1 className="text-[24px] font-bold text-gray-900">
+          <h1 className="text-[30px] text-gray-900">
             World Energy Transition Dashboard
           </h1>
 

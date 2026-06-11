@@ -36,3 +36,11 @@ export function getStackedAreaData(data) {
     other_renewable: d.other_renewable,
   }));
 }
+
+// Helper function to get the top N countries by primary energy consumption for the year 2024
+export function getTopEnergyCountries(data, topN = 10) {
+  return data
+    .filter((d) => d.year === 2024)
+    .sort((a, b) => b.primary_energy - a.primary_energy)
+    .slice(0, topN);
+}

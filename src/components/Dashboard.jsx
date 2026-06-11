@@ -7,11 +7,13 @@ import {
   getKPIMetrics,
   getStackedAreaData,
   getTopEnergyCountries,
+  getLineChartData,
 } from "../utils/energyHelper";
 
 import ResponsiveStackedAreaChart from "./charts/ResponsiveStackedAreaChart";
 import ResponsiveDonutChart from "./charts/ResponsiveDonutChart";
 import ResponsiveBarChart from "./charts/ResponsiveBarChart";
+import ResponsiveLineChart from "./charts/ResponsiveLineChart";
 
 export default function Dashboard() {
   const countries = useMemo(() => {
@@ -43,6 +45,8 @@ export default function Dashboard() {
   const stackedAreaData = getStackedAreaData(countryData);
   // Get the top 10 countries by primary energy consumption for 2024
   const topCountriesData = getTopEnergyCountries(energyData, 10);
+  // Data for the line chart (time series of primary energy consumption)
+  const lineChartData = getLineChartData(energyData);
 
   return (
     <div className="min-h-screen bg-gray-50 dashboard shadow-lg">
@@ -113,17 +117,22 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-
+      {/* ROW 2 */}
       {/* ROW 2 */}
       <div className="max-w-7xl mx-auto px-8 mt-8" style={{ margin: "30px" }}>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ResponsiveBarChart
-            data={topCountriesData}
-            selectedCountry={selectedCountry}
-          />
+          <div>
+            <ResponsiveLineChart
+              data={lineChartData}
+              selectedCountry={selectedCountry}
+            />
+          </div>
 
-          <div className="bg-white rounded-xl shadow h-[500px] flex items-center justify-center text-gray-400">
-            Future Chart
+          <div>
+            <ResponsiveBarChart
+              data={topCountriesData}
+              selectedCountry={selectedCountry}
+            />
           </div>
         </div>
       </div>

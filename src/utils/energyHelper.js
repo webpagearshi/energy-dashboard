@@ -44,3 +44,12 @@ export function getTopEnergyCountries(data, topN = 10) {
     .sort((a, b) => b.primary_energy - a.primary_energy)
     .slice(0, topN);
 }
+
+// Helper function to transform raw energy data into a format suitable for the line chart
+export function getLineChartData(data) {
+  return data.map((d) => ({
+    country: d.country,
+    year: d.year,
+    primary_energy: d.primary_energy,
+  }));
+}

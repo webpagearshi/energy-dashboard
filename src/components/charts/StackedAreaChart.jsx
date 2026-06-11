@@ -3,9 +3,9 @@ import * as d3 from "d3";
 export default function StackedAreaChart({ width, height, data }) {
   const margin = {
     top: 20,
-    right: 30,
+    right: 0,
     bottom: 70,
-    left: 60,
+    left: 50,
   };
   // The width of the area where the chart will be drawn, excluding margins
   const boundsWidth = width - margin.left - margin.right;
@@ -82,7 +82,7 @@ export default function StackedAreaChart({ width, height, data }) {
   // Create legend items
   const legendSpacing = boundsWidth / keys.length;
 
-  const itemWidth = 110;
+  const itemWidth = 80;
   const legendWidth = itemWidth * keys.length;
   const legendStartX = (boundsWidth - legendWidth) / 2;
 

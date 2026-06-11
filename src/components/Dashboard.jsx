@@ -15,15 +15,20 @@ import ResponsiveBarChart from "./charts/ResponsiveBarChart";
 
 export default function Dashboard() {
   const countries = useMemo(() => {
-    return [...new Set(energyData.map((d) => d.country))].sort();
+    const uniqueCountries = [
+      ...new Set(energyData.map((d) => d.country)),
+    ].sort();
+
+    return uniqueCountries.sort();
   }, []);
 
   const [selectedCountry, setSelectedCountry] = useState("World");
 
+  // Get the data for the selected country in 2024
   const country2024 = energyData.find(
     (d) => d.country === selectedCountry && d.year === 2024,
   );
-
+  // Handle case where data for 2024 might not be available
   const metrics = country2024
     ? getKPIMetrics(country2024)
     : {
@@ -32,88 +37,92 @@ export default function Dashboard() {
         nuclearPct: null,
         fossilFuelPct: null,
       };
-
+  // Get the time series data for the selected country
   const countryData = energyData.filter((d) => d.country === selectedCountry);
-
+  // Transform the data for the stacked area chart
   const stackedAreaData = getStackedAreaData(countryData);
-
+  // Get the top 10 countries by primary energy consumption for 2024
   const topCountriesData = getTopEnergyCountries(energyData, 10);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Main Container */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-6 space-y-8">
-        {/* Header */}
+    <div className="min-h-screen bg-gray-50 dashboard shadow-lg">
+      <div className="max-w-7xl mx-auto px-8 py-4">
         <DashboardHeader
           countries={countries}
           selectedCountry={selectedCountry}
           setSelectedCountry={setSelectedCountry}
         />
+      </div>
+      <div className="kpi-grid mt-8">
+        <KPICard
+          title="TOTAL PRIMARY ENERGY 2024"
+          name={selectedCountry}
+          value={
+            metrics.primaryEnergy !== null
+              ? metrics.primaryEnergy.toFixed(1)
+              : "No Data"
+          }
+          subtitle="consumption measured in TWh"
+        />
 
-        {/* KPI Row */}
-        <div className="kpi-grid">
-          <KPICard
-            title="TOTAL PRIMARY ENERGY 2024"
-            name={selectedCountry}
-            value={
-              metrics.primaryEnergy !== null
-                ? metrics.primaryEnergy.toFixed(1)
-                : "No Data"
-            }
-            subtitle="consumption measured in TWh"
-          />
+        <KPICard
+          title="RENEWABLE ENERGY 2024"
+          name={selectedCountry}
+          value={
+            metrics.renewablePct !== null
+              ? `${metrics.renewablePct.toFixed(1)}%`
+              : "No Data"
+          }
+          subtitle="% of total energy consumption"
+        />
 
-          <KPICard
-            title="RENEWABLE ENERGY 2024"
-            name={selectedCountry}
-            value={
-              metrics.renewablePct !== null
-                ? `${metrics.renewablePct.toFixed(1)}%`
-                : "No Data"
-            }
-            subtitle="% of total energy consumption"
-          />
+        <KPICard
+          title="NUCLEAR ENERGY 2024"
+          name={selectedCountry}
+          value={
+            metrics.nuclearPct !== null
+              ? `${metrics.nuclearPct.toFixed(1)}%`
+              : "No Data"
+          }
+          subtitle="% of total energy consumption"
+        />
 
-          <KPICard
-            title="NUCLEAR ENERGY 2024"
-            name={selectedCountry}
-            value={
-              metrics.nuclearPct !== null
-                ? `${metrics.nuclearPct.toFixed(1)}%`
-                : "No Data"
-            }
-            subtitle="% of total energy consumption"
-          />
-
-          <KPICard
-            title="FOSSIL FUELS 2024"
-            name={selectedCountry}
-            value={
-              metrics.fossilFuelPct !== null
-                ? `${metrics.fossilFuelPct.toFixed(1)}%`
-                : "No Data"
-            }
-            subtitle="coal + oil + gas"
-          />
-        </div>
-
-        {/* Row 1 */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          <div className="xl:col-span-2">
+        <KPICard
+          title="FOSSIL FUELS 2024"
+          name={selectedCountry}
+          value={
+            metrics.fossilFuelPct !== null
+              ? `${metrics.fossilFuelPct.toFixed(1)}%`
+              : "No Data"
+          }
+          subtitle="coal+oil+gas"
+        />
+      </div>
+      {/* ROW 1 */}
+      <div className="max-w-7xl mx-auto px-8 mt-8" style={{ margin: "30px" }}>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
             <ResponsiveStackedAreaChart data={stackedAreaData} />
           </div>
 
-          <ResponsiveDonutChart data={country2024} country={selectedCountry} />
+          <div>
+            <ResponsiveDonutChart
+              data={country2024}
+              country={selectedCountry}
+            />
+          </div>
         </div>
+      </div>
 
-        {/* Row 2 */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      {/* ROW 2 */}
+      <div className="max-w-7xl mx-auto px-8 mt-8" style={{ margin: "30px" }}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <ResponsiveBarChart
             data={topCountriesData}
             selectedCountry={selectedCountry}
           />
 
-          <div className="bg-white rounded-xl shadow h-[500px] flex items-center justify-center text-gray-400 text-lg">
+          <div className="bg-white rounded-xl shadow h-[500px] flex items-center justify-center text-gray-400">
             Future Chart
           </div>
         </div>

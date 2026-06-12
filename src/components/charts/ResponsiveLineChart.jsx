@@ -22,7 +22,17 @@ export default function ResponsiveLineChart({ data, selectedCountry }) {
       >
         Primary Energy Consumption Over Time - {selectedCountry}
       </h2>
-
+      <p
+        className="text-sm text-gray-400"
+        style={{
+          paddingLeft: "24px",
+          paddingTop: "0px",
+          fontSize: "10px",
+        }}
+      >
+        Selected Country is highlighted in blue. | World average is shown as a
+        dashed line.
+      </p>
       {dimensions.width > 0 && (
         <LineChart
           width={dimensions.width}

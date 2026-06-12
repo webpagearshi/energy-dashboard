@@ -18,7 +18,17 @@ export default function ResponsiveBarChart({ data, selectedCountry }) {
       >
         Top 10 Energy Consumers (2024)
       </h2>
-
+      <p
+        className="text-sm text-gray-400"
+        style={{
+          paddingLeft: "24px",
+          paddingTop: "0px",
+          fontSize: "12px",
+        }}
+      >
+        Selected Country is highlighted in salmon if it's in the Top 10 Energy
+        Consumers.
+      </p>
       {dimensions.width > 0 && (
         <BarChart
           width={dimensions.width - 32}

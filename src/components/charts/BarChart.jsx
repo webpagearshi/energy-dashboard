@@ -29,7 +29,7 @@ export default function BarChart({ width, height, data, selectedCountry }) {
       y={yScale(d.country)}
       width={xScale(d.primary_energy)}
       height={yScale.bandwidth()}
-      fill={d.country === selectedCountry ? "#f97316" : "#2173fd"}
+      fill={d.country === selectedCountry ? "salmon" : "#2173fd"}
       rx={4}
     />
   ));

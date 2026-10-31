@@ -29,15 +29,38 @@ export default function ResponsiveStackedAreaChart({ data }) {
           paddingLeft: "20px",
           paddingTop: "10px",
           paddingBottom: "0px",
-          minHeight: "65px", // Ensure space for title and legend
         }}
       >
         <h2 className="text-xl font-semibold text-gray-500">
           Energy Consumption by Source
         </h2>
-        <p className="text-sm font-medium text-gray-600">
-          {activeItem ? activeItem.label : "All energy sources"}
-        </p>
+      </div>
+      <div
+        style={{
+          marginLeft: "20px",
+          marginTop: "6px",
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "8px",
+          padding: "5px 12px",
+          borderRadius: "20px",
+          backgroundColor: "#f5f6f7",
+          border: "1px solid #ebebeb",
+          fontSize: "12px",
+          fontWeight: 500,
+          color: "#4b5563",
+          transition: "all 180ms ease",
+        }}
+      >
+        <span
+          style={{
+            width: "12px",
+            height: "12px",
+            borderRadius: "50%",
+            backgroundColor: activeItem ? activeItem.color : "#9ca3af",
+          }}
+        />
+        {activeItem ? activeItem.label : "All energy sources"}
       </div>
       {/* Chart */}
       <div className="px-6">

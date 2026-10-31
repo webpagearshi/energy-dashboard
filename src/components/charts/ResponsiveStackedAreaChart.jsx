@@ -19,6 +19,7 @@ export default function ResponsiveStackedAreaChart({ data }) {
   const chartRef = useRef();
   const dimensions = useDimensions(chartRef);
   const [activeCategory, setActiveCategory] = useState(null); // State to track the active category for highlighting
+  const activeItem = legendItems.find((item) => item.key === activeCategory);
 
   return (
     <div ref={chartRef} className="w-full bg-white rounded-xl shadow">
@@ -28,11 +29,15 @@ export default function ResponsiveStackedAreaChart({ data }) {
           paddingLeft: "20px",
           paddingTop: "10px",
           paddingBottom: "0px",
+          minHeight: "65px", // Ensure space for title and legend
         }}
       >
         <h2 className="text-xl font-semibold text-gray-500">
           Energy Consumption by Source
         </h2>
+        <p className="text-sm font-medium text-gray-600">
+          {activeItem ? activeItem.label : "All energy sources"}
+        </p>
       </div>
       {/* Chart */}
       <div className="px-6">

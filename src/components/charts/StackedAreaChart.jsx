@@ -1,6 +1,12 @@
 import * as d3 from "d3";
 
-export default function StackedAreaChart({ width, height, data }) {
+export default function StackedAreaChart({
+  width,
+  height,
+  data,
+  activeCategory,
+  onCategoryHover,
+}) {
   const margin = {
     top: 20,
     right: 0,
@@ -60,14 +66,23 @@ export default function StackedAreaChart({ width, height, data }) {
     .curve(d3.curveMonotoneX);
 
   // Draw the stacked areas
-  const areas = stackedSeries.map((series) => (
-    <path
-      key={series.key}
-      d={areaGenerator(series)}
-      fill={colors(series.key)}
-      opacity={0.9}
-    />
-  ));
+  const areas = stackedSeries.map((series) => {
+    const isActive = activeCategory === series.key;
+
+    const opacity = activeCategory === null ? 0.9 : isActive ? 1 : 0.12;
+
+    return (
+      <path
+        key={series.key}
+        d={areaGenerator(series)}
+        fill={colors(series.key)}
+        opacity={opacity}
+        style={{ transition: "opacity 180ms ease" }}
+        onMouseEnter={() => onCategoryHover(series.key)}
+        onMouseLeave={() => onCategoryHover(null)}
+      />
+    );
+  });
 
   return (
     <svg width={width} height={height}>

@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useDimensions } from "../../hooks/useDimensions";
 import StackedAreaChart from "./StackedAreaChart";
 
@@ -18,6 +18,7 @@ const legendItems = [
 export default function ResponsiveStackedAreaChart({ data }) {
   const chartRef = useRef();
   const dimensions = useDimensions(chartRef);
+  const [activeCategory, setActiveCategory] = useState(null); // State to track the active category for highlighting
 
   return (
     <div ref={chartRef} className="w-full bg-white rounded-xl shadow">
@@ -40,6 +41,8 @@ export default function ResponsiveStackedAreaChart({ data }) {
             width={dimensions.width - 32}
             height={440}
             data={data}
+            activeCategory={activeCategory}
+            onCategoryHover={setActiveCategory}
           />
         )}
       </div>
@@ -49,9 +52,19 @@ export default function ResponsiveStackedAreaChart({ data }) {
         <div className="flex flex-wrap justify-center gap-x-6 gap-y-3">
           {legendItems.map((item) => (
             <div
-              style={{ paddingBottom: "10px" }}
+              style={{
+                paddingBottom: "10px",
+                opacity:
+                  activeCategory === null || activeCategory === item.key
+                    ? 1.0
+                    : 0.35,
+                transition: "opacity 180ms ease",
+                cursor: "pointer",
+              }}
               key={item.key}
               className="flex items-center gap-2 text-xs text-gray-700"
+              onMouseEnter={() => setActiveCategory(item.key)}
+              onMouseLeave={() => setActiveCategory(null)}
             >
               <span
                 className="w-3 h-3 rounded-sm"

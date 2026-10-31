@@ -6,6 +6,16 @@
   margin-bottom: 20px;
   border-radius: 10px;
   border: 1px solid #ebebeb;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.kpi-card:hover {
+  border-color: #d0d0d0;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
 }
 
 .kpi-title {
@@ -20,8 +30,28 @@
 .kpi-value {
   font-size: 2rem;
   font-weight: 600;
+  display: inline-block;
+  transform-origin: left center;
+  transition: transform 180ms ease;
+}
+
+.kpi-card:hover .kpi-value {
+  transform: scale(1.04);
 }
 
 .kpi-subtitle {
   margin-top: 0.5rem;
+}
+
+/* Add this at the bottom */
+@media (prefers-reduced-motion: reduce) {
+  .kpi-card,
+  .kpi-value {
+    transition: none;
+  }
+
+  .kpi-card:hover,
+  .kpi-card:hover .kpi-value {
+    transform: none;
+  }
 }

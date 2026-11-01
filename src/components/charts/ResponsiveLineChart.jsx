@@ -35,10 +35,12 @@ export default function ResponsiveLineChart({ data, selectedCountry }) {
 
           <p
             className="text-sm text-gray-400 mt-1"
-            style={{ fontSize: "10px" }}
+            style={{ fontSize: "10px", marginLeft: "10px" }}
           >
             Selected country is highlighted in blue. World average is shown as a
-            solid line.
+            blue dashed line. When comparison country is selected, it is shown
+            as a purple dashed line. Hover to compare values of two countries at
+            a specific year.
           </p>
         </div>
 

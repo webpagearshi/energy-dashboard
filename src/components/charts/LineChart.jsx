@@ -9,7 +9,7 @@ export default function LineChart({
   comparisonCountry,
 }) {
   const [isChartHovered, setIsChartHovered] = useState(false); // State to track if the chart is hovered
-
+  const [hoveredYear, setHoveredYear] = useState(null); // State to track the year being hovered over
   const margin = {
     top: 20,
     right: 30,
@@ -32,11 +32,59 @@ export default function LineChart({
     ? countries.get(comparisonCountry)
     : undefined;
 
+  // Sort selected country data by year
+  const selectedDataSorted = [...(selectedData || [])].sort(
+    (a, b) => a.year - b.year,
+  );
+
+  // Find primary country value for hovered year
+  const selectedPoint =
+    hoveredYear !== null
+      ? selectedDataSorted.find((d) => d.year === hoveredYear)
+      : null;
+
+  // Find comparison country value for hovered year
+  const comparisonPoint =
+    hoveredYear !== null && comparisonData
+      ? comparisonData.find((d) => d.year === hoveredYear)
+      : null;
+
+  // Format energy values
+  const formatValue = d3.format(",.2f");
+
+  // Calculate difference between the two countries
+  const difference =
+    selectedPoint && comparisonPoint
+      ? selectedPoint.primary_energy - comparisonPoint.primary_energy
+      : null;
+
   // X Scale
   const xScale = d3
     .scaleLinear()
     .domain(d3.extent(data, (d) => d.year))
     .range([0, boundsWidth]);
+
+  // Handle mouse movement
+  const handlePointerMove = (event) => {
+    if (selectedDataSorted.length === 0) return;
+
+    // Get mouse coordinates relative to the chart
+    const [mouseX] = d3.pointer(event, event.currentTarget);
+
+    // Convert mouse position into a year
+    const targetYear = xScale.invert(mouseX);
+
+    // Find the nearest available year
+    const nearestIndex = d3
+      .bisector((d) => d.year)
+      .center(selectedDataSorted, targetYear);
+
+    // Get the actual year
+    const nearestYear = selectedDataSorted[nearestIndex].year;
+
+    // Update React state
+    setHoveredYear(nearestYear);
+  };
 
   // Y Scale
 
@@ -58,6 +106,21 @@ export default function LineChart({
     .domain(yDomain)
     .nice()
     .range([boundsHeight, 0]);
+
+  // Tooltip dimensions
+  const tooltipWidth = 220;
+  const tooltipHeight = 102;
+
+  // Tooltip horizontal position
+  const tooltipX =
+    hoveredYear === null
+      ? 0
+      : xScale(hoveredYear) + tooltipWidth + 16 <= boundsWidth
+        ? xScale(hoveredYear) + 16
+        : Math.max(4, xScale(hoveredYear) - tooltipWidth - 16);
+
+  // Tooltip vertical position
+  const tooltipY = 8;
 
   // Line Generator
   const lineGenerator = d3
@@ -140,6 +203,16 @@ export default function LineChart({
           ${margin.top}
         )`}
       >
+        <rect
+          x={0}
+          y={0}
+          width={boundsWidth}
+          height={boundsHeight}
+          fill="transparent"
+          pointerEvents="all"
+          onPointerMove={handlePointerMove}
+          onPointerLeave={() => setHoveredYear(null)}
+        />
         {/* All Other Countries */}
         {!isChartHovered && otherLines}
 
@@ -151,6 +224,78 @@ export default function LineChart({
 
         {/* Selected Country */}
         {selectedLine}
+
+        {/* Vertical guide line */}
+        {hoveredYear !== null && (
+          <line
+            x1={xScale(hoveredYear)}
+            x2={xScale(hoveredYear)}
+            y1={0}
+            y2={boundsHeight}
+            stroke="#9ca3af"
+            strokeWidth={1}
+            strokeDasharray="4 4"
+            pointerEvents="none"
+          />
+        )}
+
+        {/* Primary country marker */}
+        {selectedPoint && (
+          <g pointerEvents="none">
+            {/* Red outer circle */}
+            <circle
+              cx={xScale(selectedPoint.year)}
+              cy={yScale(selectedPoint.primary_energy)}
+              r={7}
+              fill="white"
+              stroke="#ef4444"
+              strokeWidth={2}
+            />
+
+            {/* Inner circle */}
+            <circle
+              cx={xScale(selectedPoint.year)}
+              cy={yScale(selectedPoint.primary_energy)}
+              r={3}
+              fill="#1d4ed8"
+            />
+          </g>
+        )}
+
+        {/* Comparison country marker */}
+        {comparisonPoint && (
+          <g pointerEvents="none">
+            {/* Red outer circle */}
+            <circle
+              cx={xScale(comparisonPoint.year)}
+              cy={yScale(comparisonPoint.primary_energy)}
+              r={7}
+              fill="white"
+              stroke="#ef4444"
+              strokeWidth={2}
+            />
+
+            {/* Inner circle */}
+            <circle
+              cx={xScale(comparisonPoint.year)}
+              cy={yScale(comparisonPoint.primary_energy)}
+              r={3}
+              fill="#8b5cf6"
+            />
+          </g>
+        )}
+
+        {hoveredYear !== null && (
+          <text
+            x={xScale(hoveredYear)}
+            y={-6}
+            textAnchor="middle"
+            fontSize="11"
+            fill="#4b5563"
+          >
+            {hoveredYear}
+          </text>
+        )}
 
         {/* X Axis */}
         <g

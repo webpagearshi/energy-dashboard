@@ -1,4 +1,5 @@
 import * as d3 from "d3";
+import { useState } from "react";
 
 export default function LineChart({
   width,
@@ -7,6 +8,8 @@ export default function LineChart({
   selectedCountry,
   comparisonCountry,
 }) {
+  const [isChartHovered, setIsChartHovered] = useState(false); // State to track if the chart is hovered
+
   const margin = {
     top: 20,
     right: 30,
@@ -21,6 +24,14 @@ export default function LineChart({
   // Group data by country
   const countries = d3.group(data, (d) => d.country);
 
+  // Primary country data
+  const selectedData = countries.get(selectedCountry);
+
+  // Comparison country data
+  const comparisonData = comparisonCountry
+    ? countries.get(comparisonCountry)
+    : undefined;
+
   // X Scale
   const xScale = d3
     .scaleLinear()
@@ -28,11 +39,23 @@ export default function LineChart({
     .range([0, boundsWidth]);
 
   // Y Scale
+
+  // Maximum value across the entire dataset
   const maxEnergy = d3.max(data, (d) => d.primary_energy);
+
+  // Combine the selected countries' data
+  const focusedData = [...(selectedData || []), ...(comparisonData || [])];
+
+  // Find the minimum and maximum values
+  const focusExtent = d3.extent(focusedData, (d) => d.primary_energy);
+
+  // Choose the Y-axis domain
+  const yDomain =
+    isChartHovered && focusedData.length > 0 ? focusExtent : [0, maxEnergy];
 
   const yScale = d3
     .scaleLinear()
-    .domain([0, maxEnergy])
+    .domain(yDomain)
     .nice()
     .range([boundsHeight, 0]);
 
@@ -85,14 +108,6 @@ export default function LineChart({
   // Selected Country Line
   // ---------------------------
 
-  const selectedData = countries.get(selectedCountry);
-
-  // Comparison Country Data
-
-  const comparisonData = comparisonCountry
-    ? countries.get(comparisonCountry)
-    : undefined;
-
   const comparisonLine = comparisonData && (
     <path
       d={lineGenerator(comparisonData)}
@@ -113,7 +128,12 @@ export default function LineChart({
   );
 
   return (
-    <svg width={width} height={height}>
+    <svg
+      width={width}
+      height={height}
+      onPointerEnter={() => setIsChartHovered(true)}
+      onPointerLeave={() => setIsChartHovered(false)}
+    >
       <g
         transform={`translate(
           ${margin.left},
@@ -121,10 +141,10 @@ export default function LineChart({
         )`}
       >
         {/* All Other Countries */}
-        {otherLines}
+        {!isChartHovered && otherLines}
 
         {/* World */}
-        {worldLine}
+        {!isChartHovered && worldLine}
 
         {/* Comparison Country */}
         {comparisonLine}

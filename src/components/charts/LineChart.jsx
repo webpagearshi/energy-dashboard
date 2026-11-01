@@ -284,6 +284,110 @@ export default function LineChart({
             />
           </g>
         )}
+        {/* Comparative Tooltip */}
+        {hoveredYear !== null && selectedPoint && (
+          <g
+            transform={`translate(${tooltipX}, ${tooltipY})`}
+            pointerEvents="none"
+          >
+            {/* Tooltip Background */}
+            <rect
+              width={tooltipWidth}
+              height={tooltipHeight}
+              rx={8}
+              fill="white"
+              stroke="#e5e7eb"
+              strokeWidth={1}
+              style={{
+                filter: "drop-shadow(0 2px 5px rgba(0,0,0,0.12))",
+              }}
+            />
+
+            {/* Tooltip Heading */}
+            <text x={12} y={20} fontSize={11} fontWeight="600" fill="#374151">
+              Energy Consumption · {hoveredYear}
+            </text>
+
+            {/* Divider */}
+            <line
+              x1={10}
+              y1={29}
+              x2={tooltipWidth - 10}
+              y2={29}
+              stroke="#e5e7eb"
+            />
+
+            {/* Primary Country */}
+            <circle cx={14} cy={46} r={4} fill="#1d4ed8" />
+
+            <text x={24} y={49} fontSize={10} fill="#4b5563">
+              {selectedCountry}
+            </text>
+
+            <text
+              x={tooltipWidth - 12}
+              y={49}
+              textAnchor="end"
+              fontSize={10}
+              fontWeight="600"
+              fill="#374151"
+            >
+              {formatValue(selectedPoint.primary_energy)}
+            </text>
+
+            {/* Comparison Country */}
+            {comparisonCountry && (
+              <>
+                <circle cx={14} cy={66} r={4} fill="#8b5cf6" />
+
+                <text x={24} y={69} fontSize={10} fill="#4b5563">
+                  {comparisonCountry}
+                </text>
+
+                <text
+                  x={tooltipWidth - 12}
+                  y={69}
+                  textAnchor="end"
+                  fontSize={10}
+                  fontWeight="600"
+                  fill="#374151"
+                >
+                  {comparisonPoint
+                    ? formatValue(comparisonPoint.primary_energy)
+                    : "No data"}
+                </text>
+              </>
+            )}
+
+            {/* Difference */}
+            {comparisonPoint && (
+              <>
+                <line
+                  x1={10}
+                  y1={78}
+                  x2={tooltipWidth - 10}
+                  y2={78}
+                  stroke="#e5e7eb"
+                />
+
+                <text x={12} y={93} fontSize={10} fill="#6b7280">
+                  Difference
+                </text>
+
+                <text
+                  x={tooltipWidth - 12}
+                  y={93}
+                  textAnchor="end"
+                  fontSize={10}
+                  fontWeight="600"
+                  fill="#374151"
+                >
+                  {d3.format("+,.2f")(difference)}
+                </text>
+              </>
+            )}
+          </g>
+        )}
 
         {hoveredYear !== null && (
           <text

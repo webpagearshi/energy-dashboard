@@ -29,23 +29,21 @@ export default function ResponsiveLineChart({ data, selectedCountry }) {
       <div className="flex justify-between items-start px-6 pt-4 gap-4">
         {/* LEFT: Chart title and description */}
         <div>
-          <h2 className="text-xl text-gray-500 font-semibold">
+          <h2
+            className="text-xl text-gray-500 font-semibold"
+            style={{ marginLeft: "10px" }}
+          >
             Primary Energy Consumption Over Time - {selectedCountry}
           </h2>
 
           <p
             className="text-sm text-gray-400 mt-1"
             style={{ fontSize: "10px", marginLeft: "10px" }}
-          >
-            Selected country is highlighted in blue. World average is shown as a
-            blue dashed line. When comparison country is selected, it is shown
-            as a purple dashed line. Hover to compare values of two countries at
-            a specific year.
-          </p>
+          ></p>
         </div>
 
         {/* RIGHT: Comparison country selector */}
-        <div className="flex flex-col min-w-[160px]">
+        <div className="flex flex-col w-[150px] mr-[10px]">
           <label
             htmlFor="comparison-country"
             className="text-xs text-gray-500 mb-1"
@@ -57,7 +55,8 @@ export default function ResponsiveLineChart({ data, selectedCountry }) {
             id="comparison-country"
             value={comparisonCountry}
             onChange={(e) => setComparisonCountry(e.target.value)}
-            className="border rounded-lg px-3 py-2 text-xs text-gray-600"
+            className="w-full border rounded-lg px-2 py-2 text-xs text-gray-600"
+            style={{ fontSize: "15px" }}
           >
             <option value="">No comparison</option>
 

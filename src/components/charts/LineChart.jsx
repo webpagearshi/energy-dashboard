@@ -1,6 +1,12 @@
 import * as d3 from "d3";
 
-export default function LineChart({ width, height, data, selectedCountry }) {
+export default function LineChart({
+  width,
+  height,
+  data,
+  selectedCountry,
+  comparisonCountry,
+}) {
   const margin = {
     top: 20,
     right: 30,
@@ -42,7 +48,12 @@ export default function LineChart({ width, height, data, selectedCountry }) {
   // ---------------------------
 
   const otherLines = [...countries.entries()]
-    .filter(([country]) => country !== selectedCountry && country !== "World")
+    .filter(
+      ([country]) =>
+        country !== selectedCountry &&
+        country !== comparisonCountry &&
+        country !== "World",
+    )
     .map(([country, values]) => (
       <path
         key={country}
@@ -76,6 +87,22 @@ export default function LineChart({ width, height, data, selectedCountry }) {
 
   const selectedData = countries.get(selectedCountry);
 
+  // Comparison Country Data
+
+  const comparisonData = comparisonCountry
+    ? countries.get(comparisonCountry)
+    : undefined;
+
+  const comparisonLine = comparisonData && (
+    <path
+      d={lineGenerator(comparisonData)}
+      fill="none"
+      stroke="#8b5cf6"
+      strokeWidth={2}
+      strokeDasharray="3 3"
+    />
+  );
+
   const selectedLine = selectedData && (
     <path
       d={lineGenerator(selectedData)}
@@ -98,6 +125,9 @@ export default function LineChart({ width, height, data, selectedCountry }) {
 
         {/* World */}
         {worldLine}
+
+        {/* Comparison Country */}
+        {comparisonLine}
 
         {/* Selected Country */}
         {selectedLine}

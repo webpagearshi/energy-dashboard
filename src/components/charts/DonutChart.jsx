@@ -73,8 +73,6 @@ export default function DonutChart({ width, height, data, country }) {
       <g
         key={slice.data.name}
         transform={`translate(${moveX}, ${moveY})`}
-        onMouseEnter={() => setActiveCategory(slice.data.name)}
-        onMouseLeave={() => setActiveCategory(null)}
         style={{
           cursor: "pointer",
         }}
@@ -92,6 +90,32 @@ export default function DonutChart({ width, height, data, country }) {
       </g>
     );
   });
+  // Invisible hover areas for detecting slices
+  const sliceHitAreas = pieData.map((slice) => (
+    <path
+      key={`hit-${slice.data.name}`}
+      d={arcGenerator(slice)}
+      fill="transparent"
+      pointerEvents="all"
+      onPointerEnter={() => setActiveCategory(slice.data.name)}
+      onPointerLeave={() => setActiveCategory(null)}
+    />
+  ));
+
+  // Find the currently selected slice
+  const activeSlice = pieData.find(
+    (slice) => slice.data.name === activeCategory,
+  );
+
+  // Calculate total energy represented in the donut
+  const totalEnergy = d3.sum(energyMix, (d) => d.value);
+
+  // Calculate selected category's percentage
+  const activeShare = activeSlice
+    ? (activeSlice.data.value / totalEnergy) * 100
+    : 0;
+
+  const formatValue = d3.format(",.1f"); // Format values with one decimal place and commas
 
   // Render the SVG with the donut chart and center text
   return (
@@ -103,16 +127,35 @@ export default function DonutChart({ width, height, data, country }) {
       )`}
       >
         {slices}
+        {sliceHitAreas}
 
-        <text textAnchor="middle" fontSize="12" fontWeight="600" fill="#374151">
-          {country}
-        </text>
-        <text y="22" textAnchor="middle" fontSize="12" fill="#6B7280">
-          {data.primary_energy?.toFixed(0)} TWh
+        {/* Category name or country name */}
+        <text
+          y={-12}
+          textAnchor="middle"
+          fontSize={11}
+          fontWeight="600"
+          fill="#374151"
+        >
+          {activeSlice ? `${activeSlice.data.name} · ${country}` : country}
         </text>
 
-        <text y="40" textAnchor="middle" fontSize="10" fill="#6B7280">
-          2024
+        {/* Category value or total energy */}
+        <text
+          y={10}
+          textAnchor="middle"
+          fontSize={12}
+          fontWeight="600"
+          fill="#374151"
+        >
+          {activeSlice
+            ? `${formatValue(activeSlice.data.value)} TWh`
+            : `${data.primary_energy?.toFixed(0)} TWh`}
+        </text>
+
+        {/* Category share or year */}
+        <text y={30} textAnchor="middle" fontSize={10} fill="#6B7280">
+          {activeSlice ? `${activeShare.toFixed(1)}% of mix` : "2024"}
         </text>
       </g>
     </svg>

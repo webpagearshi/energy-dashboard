@@ -1,6 +1,9 @@
 import * as d3 from "d3";
+import { useState } from "react";
 
 export default function DonutChart({ width, height, data, country }) {
+  const [activeCategory, setActiveCategory] = useState(null); // State to track the active category for highlighting
+
   // Transform the data into a format suitable for the pie generator, remove zero-value categories
   const energyMix = [
     { name: "Coal", value: data.coal },
@@ -33,25 +36,63 @@ export default function DonutChart({ width, height, data, country }) {
     .pie()
     .value((d) => d.value)
     .sort(null);
+
   // Generate the pie data and arc generator
   const pieData = pieGenerator(energyMix);
   // Calculate the radius based on the smaller dimension of the chart
   const radius = Math.min(width, height) / 2 - 30;
+
   // Create the arc generator for the donut slices
   const arcGenerator = d3
     .arc()
     .innerRadius(radius * 0.55)
     .outerRadius(radius);
-  // Generate the SVG paths for each slice of the donut chart
-  const slices = pieData.map((slice, i) => (
-    <path
-      key={i}
-      d={arcGenerator(slice)}
-      fill={colors(slice.data.name)}
-      stroke="white"
-      strokeWidth={2}
-    />
-  ));
+
+  // Expanded arc for the hovered slice
+  const activeArcGenerator = d3
+    .arc()
+    .innerRadius(radius * 0.6)
+    .outerRadius(radius + 6);
+
+  // Generate the SVG paths for each slice
+  const slices = pieData.map((slice) => {
+    const isActive = activeCategory === slice.data.name;
+
+    // Find the direction in which the slice should move
+    const [centroidX, centroidY] = arcGenerator.centroid(slice);
+
+    const centroidLength = Math.hypot(centroidX, centroidY) || 1;
+
+    // Move the active slice 7 pixels away from the centre
+    const offset = isActive ? 7 : 0;
+
+    const moveX = (centroidX / centroidLength) * offset;
+    const moveY = (centroidY / centroidLength) * offset;
+
+    return (
+      <g
+        key={slice.data.name}
+        transform={`translate(${moveX}, ${moveY})`}
+        onMouseEnter={() => setActiveCategory(slice.data.name)}
+        onMouseLeave={() => setActiveCategory(null)}
+        style={{
+          cursor: "pointer",
+        }}
+      >
+        <path
+          d={isActive ? activeArcGenerator(slice) : arcGenerator(slice)}
+          fill={colors(slice.data.name)}
+          stroke={isActive ? "black" : "white"}
+          strokeWidth={isActive ? 0.5 : 2}
+          opacity={activeCategory === null || isActive ? 1 : 0.25}
+          style={{
+            transition: "opacity 180ms ease",
+          }}
+        />
+      </g>
+    );
+  });
+
   // Render the SVG with the donut chart and center text
   return (
     <svg width={width} height={height}>

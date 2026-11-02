@@ -6,6 +6,13 @@ export default function ResponsiveBarChart({ data, selectedCountry }) {
   const chartRef = useRef();
   const dimensions = useDimensions(chartRef);
 
+  // Get top 10 energy-consuming countries, excluding World
+  const top10Data = data
+    .filter((d) => d.country !== "World")
+    .sort((a, b) => b.primary_energy - a.primary_energy)
+    .slice(0, 10);
+  console.log("Incoming data:", data.length, data);
+  console.log("Final bar chart data:", top10Data.length, top10Data);
   return (
     <div
       ref={chartRef}
@@ -33,7 +40,7 @@ export default function ResponsiveBarChart({ data, selectedCountry }) {
         <BarChart
           width={dimensions.width - 32}
           height={420}
-          data={data}
+          data={top10Data}
           selectedCountry={selectedCountry}
         />
       )}

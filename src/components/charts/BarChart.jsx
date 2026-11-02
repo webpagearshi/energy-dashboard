@@ -94,7 +94,12 @@ export default function BarChart({ width, height, data, selectedCountry }) {
         )`}
           ref={(node) => {
             if (node) {
-              d3.select(node).call(d3.axisBottom(xScale));
+              d3.select(node).call(
+                d3
+                  .axisBottom(xScale)
+                  .ticks(boundsWidth < 350 ? 4 : 6)
+                  .tickFormat(d3.format(".0s")),
+              );
             }
           }}
         />

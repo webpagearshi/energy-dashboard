@@ -43,8 +43,12 @@ export default function Dashboard() {
   const countryData = energyData.filter((d) => d.country === selectedCountry);
   // Transform the data for the stacked area chart
   const stackedAreaData = getStackedAreaData(countryData);
-  // Get the top 10 countries by primary energy consumption for 2024
-  const topCountriesData = getTopEnergyCountries(energyData, 10);
+
+  // Get the top 10 countries by primary energy consumption for 2024, excluding World
+  const topCountriesData = getTopEnergyCountries(
+    energyData.filter((d) => d.country !== "World"),
+    10,
+  );
   // Data for the line chart (time series of primary energy consumption)
   const lineChartData = getLineChartData(energyData);
 

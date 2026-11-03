@@ -15,11 +15,10 @@ const legendItems = [
   { key: "other_renewable", label: "Other Renewable", color: "#01325a" },
 ];
 
-export default function ResponsiveStackedAreaChart({ data }) {
+export default function ResponsiveStackedAreaChart({ data, country }) {
   const chartRef = useRef();
   const dimensions = useDimensions(chartRef);
   const [activeCategory, setActiveCategory] = useState(null); // State to track the active category for highlighting
-  const activeItem = legendItems.find((item) => item.key === activeCategory);
 
   return (
     <div ref={chartRef} className="w-full bg-white rounded-xl shadow">
@@ -32,36 +31,10 @@ export default function ResponsiveStackedAreaChart({ data }) {
         }}
       >
         <h2 className="text-xl font-semibold text-gray-500">
-          Energy Consumption by Source
+          Energy Consumption by Source - {country}
         </h2>
       </div>
-      <div
-        style={{
-          marginLeft: "20px",
-          marginTop: "6px",
-          display: "inline-flex",
-          alignItems: "center",
-          gap: "8px",
-          padding: "5px 12px",
-          borderRadius: "20px",
-          backgroundColor: "#f5f6f7",
-          border: "1px solid #ebebeb",
-          fontSize: "12px",
-          fontWeight: 500,
-          color: "#4b5563",
-          transition: "all 180ms ease",
-        }}
-      >
-        <span
-          style={{
-            width: "12px",
-            height: "12px",
-            borderRadius: "50%",
-            backgroundColor: activeItem ? activeItem.color : "#9ca3af",
-          }}
-        />
-        {activeItem ? activeItem.label : "All energy sources"}
-      </div>
+
       {/* Chart */}
       <div className="px-6">
         {dimensions.width > 0 && (
@@ -71,6 +44,7 @@ export default function ResponsiveStackedAreaChart({ data }) {
             data={data}
             activeCategory={activeCategory}
             onCategoryHover={setActiveCategory}
+            country={country}
           />
         )}
       </div>

@@ -110,7 +110,10 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto px-8 mt-8" style={{ margin: "30px" }}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <ResponsiveStackedAreaChart data={stackedAreaData} />
+            <ResponsiveStackedAreaChart
+              data={stackedAreaData}
+              country={selectedCountry}
+            />
           </div>
 
           <div>

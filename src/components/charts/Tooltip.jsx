@@ -5,7 +5,7 @@ export default function Tooltip({ interactionData }) {
     return null;
   }
 
-  const { xPos, yPos, name, xValue, yValue, color } = interactionData;
+  const { xPos, yPos, name, xValue, yValue, color, country } = interactionData;
 
   return (
     <div
@@ -16,7 +16,9 @@ export default function Tooltip({ interactionData }) {
         borderColor: color,
       }}
     >
-      <b style={{ color }}>{name}</b>
+      <b style={{ color }}>
+        {name} — {country}
+      </b>
 
       <p>Year: {xValue}</p>
 

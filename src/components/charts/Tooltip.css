@@ -1,0 +1,26 @@
+.chart-tooltip {
+  position: absolute;
+  z-index: 20;
+  min-width: 170px;
+  padding: 10px 12px;
+  background: white;
+  border: 1px solid;
+  border-radius: 8px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
+  font-size: 11px;
+  line-height: 1.5;
+  color: #374151;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.chart-tooltip b {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.chart-tooltip p {
+  margin: 2px 0;
+  color: #6b7280;
+}

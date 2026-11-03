@@ -16,9 +16,11 @@ export default function Tooltip({ interactionData }) {
         borderColor: color,
       }}
     >
-      <b style={{ color }}>
-        {name} — {country}
-      </b>
+      <div style={{ fontSize: "12px", marginBottom: "4px" }}>
+        <strong style={{ color, fontWeight: 600 }}>{name}</strong>
+
+        <span style={{ color: "#6b7280", fontWeight: 600 }}> — {country}</span>
+      </div>
 
       <p>Year: {xValue}</p>
 

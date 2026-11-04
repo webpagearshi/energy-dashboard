@@ -8,22 +8,22 @@ import {
 const socialLinks = [
   {
     name: "LinkedIn",
-    url: "YOUR_LINKEDIN_URL",
+    url: "https://www.linkedin.com/in/arshisaleh/",
     icon: FaLinkedinIn,
   },
   {
     name: "Tableau",
-    url: "YOUR_TABLEAU_URL",
+    url: "https://public.tableau.com/app/profile/arshisaleh/vizzes",
     icon: FaChartBar,
   },
   {
     name: "Instagram",
-    url: "YOUR_INSTAGRAM_URL",
+    url: "https://www.instagram.com/arshisaleh/?hl=en",
     icon: FaInstagram,
   },
   {
     name: "Twitter",
-    url: "YOUR_TWITTER_URL",
+    url: "https://x.com/SalehArshi",
     icon: FaTwitter,
   },
 ];

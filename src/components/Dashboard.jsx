@@ -148,8 +148,8 @@ export default function Dashboard() {
       {/* Footer */}
       <div style={{ paddingTop: "30px", paddingBottom: "24px" }}>
         <Footer
-          dataSourceName="YOUR DATA SOURCE"
-          dataSourceUrl="YOUR DATA SOURCE URL"
+          dataSourceName="Our World in Data"
+          dataSourceUrl="https://github.com/owid/energy-data"
         />
       </div>
     </div>

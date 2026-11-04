@@ -31,7 +31,7 @@ export default function ResponsiveLineChart({ data, selectedCountry }) {
         <div>
           <h2
             className="text-xl text-gray-500 font-semibold"
-            style={{ marginLeft: "10px" }}
+            style={{ marginLeft: "10px", marginTop: "10px" }}
           >
             Primary Energy Consumption Over Time - {selectedCountry}
           </h2>
@@ -43,10 +43,14 @@ export default function ResponsiveLineChart({ data, selectedCountry }) {
         </div>
 
         {/* RIGHT: Comparison country selector */}
-        <div className="flex flex-col w-[150px] mr-[10px]">
+        <div
+          className="flex flex-col w-[140px] shrink-0"
+          style={{ transform: "translateX(-10px)" }}
+        >
           <label
             htmlFor="comparison-country"
             className="text-xs text-gray-500 mb-1"
+            style={{ marginTop: "10px" }}
           >
             Compare with:
           </label>

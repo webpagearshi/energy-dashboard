@@ -14,6 +14,7 @@ import ResponsiveStackedAreaChart from "./charts/ResponsiveStackedAreaChart";
 import ResponsiveDonutChart from "./charts/ResponsiveDonutChart";
 import ResponsiveBarChart from "./charts/ResponsiveBarChart";
 import ResponsiveLineChart from "./charts/ResponsiveLineChart";
+import Footer from "./Footer";
 
 export default function Dashboard() {
   const countries = useMemo(() => {
@@ -107,7 +108,7 @@ export default function Dashboard() {
         />
       </div>
       {/* ROW 1 */}
-      <div className="max-w-7xl mx-auto px-8 mt-8" style={{ margin: "30px" }}>
+      <div className="max-w-7xl mx-auto px-8 mt-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <ResponsiveStackedAreaChart
@@ -126,7 +127,7 @@ export default function Dashboard() {
       </div>
       {/* ROW 2 */}
       {/* ROW 2 */}
-      <div className="max-w-7xl mx-auto px-8 mt-8" style={{ margin: "30px" }}>
+      <div className="max-w-7xl mx-auto px-8 mt-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div>
             <ResponsiveLineChart
@@ -142,6 +143,14 @@ export default function Dashboard() {
             />
           </div>
         </div>
+      </div>
+
+      {/* Footer */}
+      <div style={{ paddingTop: "30px", paddingBottom: "24px" }}>
+        <Footer
+          dataSourceName="YOUR DATA SOURCE"
+          dataSourceUrl="YOUR DATA SOURCE URL"
+        />
       </div>
     </div>
   );

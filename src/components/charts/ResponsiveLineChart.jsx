@@ -48,7 +48,7 @@ export default function ResponsiveLineChart({ data, selectedCountry }) {
             htmlFor="comparison-country"
             className="text-xs text-gray-500 mb-1"
           >
-            Compare with
+            Compare with:
           </label>
 
           <select
@@ -71,13 +71,15 @@ export default function ResponsiveLineChart({ data, selectedCountry }) {
 
       {/* CHART */}
       {dimensions.width > 0 && (
-        <LineChart
-          width={dimensions.width}
-          height={450}
-          data={data}
-          selectedCountry={selectedCountry}
-          comparisonCountry={comparisonCountry}
-        />
+        <div className="px-4 pt-2">
+          <LineChart
+            width={dimensions.width - 32}
+            height={420}
+            data={data}
+            selectedCountry={selectedCountry}
+            comparisonCountry={comparisonCountry}
+          />
+        </div>
       )}
     </div>
   );

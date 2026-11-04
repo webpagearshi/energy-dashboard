@@ -11,10 +11,10 @@ export default function LineChart({
   const [isChartHovered, setIsChartHovered] = useState(false); // State to track if the chart is hovered
   const [hoveredYear, setHoveredYear] = useState(null); // State to track the year being hovered over
   const margin = {
-    top: 20,
-    right: 30,
-    bottom: 50,
-    left: 60,
+    top: 30,
+    right: 10,
+    bottom: 20,
+    left: 70,
   };
 
   const boundsWidth = width - margin.left - margin.right;

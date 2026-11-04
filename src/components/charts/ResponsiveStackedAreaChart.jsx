@@ -21,7 +21,10 @@ export default function ResponsiveStackedAreaChart({ data, country }) {
   const [activeCategory, setActiveCategory] = useState(null); // State to track the active category for highlighting
 
   return (
-    <div ref={chartRef} className="w-full bg-white rounded-xl shadow">
+    <div
+      ref={chartRef}
+      className="w-full h-[510px] bg-white rounded-xl shadow flex flex-col"
+    >
       {/* Title */}
       <div
         style={{
@@ -50,7 +53,7 @@ export default function ResponsiveStackedAreaChart({ data, country }) {
       </div>
 
       {/* Legend */}
-      <div className="px-6 pb-6 pt-3">
+      <div className="px-6 pb-4 pt-3 mt-auto">
         <div className="flex flex-wrap justify-center gap-x-6 gap-y-3">
           {legendItems.map((item) => (
             <div

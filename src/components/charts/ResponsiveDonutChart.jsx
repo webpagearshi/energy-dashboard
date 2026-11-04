@@ -7,7 +7,7 @@ export default function ResponsiveDonutChart({ data, country }) {
   const dimensions = useDimensions(chartRef);
 
   return (
-    <div ref={chartRef} className="w-full h-[500px] bg-white rounded-xl shadow">
+    <div ref={chartRef} className="w-full h-[510px] bg-white rounded-xl shadow">
       <h2
         className="text-xl text-gray-500 font-semibold p-4"
         style={{ padding: "10px 10px 0px 20px" }}

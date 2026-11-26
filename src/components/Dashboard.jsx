@@ -27,10 +27,14 @@ export default function Dashboard() {
 
   const [selectedCountry, setSelectedCountry] = useState("World");
 
+  // Shared category highlight between the stacked area chart and donut chart
+  const [activeCategory, setActiveCategory] = useState(null);
+
   // Get the data for the selected country in 2024
   const country2024 = energyData.find(
     (d) => d.country === selectedCountry && d.year === 2024,
   );
+
   // Handle case where data for 2024 might not be available
   const metrics = country2024
     ? getKPIMetrics(country2024)
@@ -40,17 +44,21 @@ export default function Dashboard() {
         nuclearPct: null,
         fossilFuelPct: null,
       };
+
   // Get the time series data for the selected country
   const countryData = energyData.filter((d) => d.country === selectedCountry);
+
   // Transform the data for the stacked area chart
   const stackedAreaData = getStackedAreaData(countryData);
 
-  // Get the top 10 countries by primary energy consumption for 2024, excluding World
+  // Get the top 10 countries by primary energy consumption for 2024,
+  // excluding World
   const topCountriesData = getTopEnergyCountries(
     energyData.filter((d) => d.country !== "World"),
     10,
   );
-  // Data for the line chart (time series of primary energy consumption)
+
+  // Data for the line chart
   const lineChartData = getLineChartData(energyData);
 
   return (
@@ -59,9 +67,13 @@ export default function Dashboard() {
         <DashboardHeader
           countries={countries}
           selectedCountry={selectedCountry}
-          setSelectedCountry={setSelectedCountry}
+          setSelectedCountry={(country) => {
+            setSelectedCountry(country);
+            setActiveCategory(null);
+          }}
         />
       </div>
+
       <div className="kpi-grid mt-8">
         <KPICard
           title="TOTAL PRIMARY ENERGY 2024"
@@ -107,6 +119,7 @@ export default function Dashboard() {
           subtitle="coal+oil+gas"
         />
       </div>
+
       {/* ROW 1 */}
       <div className="max-w-7xl mx-auto px-8 mt-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -114,6 +127,8 @@ export default function Dashboard() {
             <ResponsiveStackedAreaChart
               data={stackedAreaData}
               country={selectedCountry}
+              activeCategory={activeCategory}
+              onCategoryHover={setActiveCategory}
             />
           </div>
 
@@ -121,11 +136,13 @@ export default function Dashboard() {
             <ResponsiveDonutChart
               data={country2024}
               country={selectedCountry}
+              activeCategory={activeCategory}
+              onCategoryHover={setActiveCategory}
             />
           </div>
         </div>
       </div>
-      {/* ROW 2 */}
+
       {/* ROW 2 */}
       <div className="max-w-7xl mx-auto px-8 mt-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

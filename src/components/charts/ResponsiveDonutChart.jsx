@@ -2,7 +2,12 @@ import { useRef } from "react";
 import { useDimensions } from "../../hooks/useDimensions";
 import DonutChart from "./DonutChart";
 
-export default function ResponsiveDonutChart({ data, country }) {
+export default function ResponsiveDonutChart({
+  data,
+  country,
+  activeCategory,
+  onCategoryHover,
+}) {
   const chartRef = useRef();
   const dimensions = useDimensions(chartRef);
 
@@ -21,6 +26,8 @@ export default function ResponsiveDonutChart({ data, country }) {
           height={420}
           data={data}
           country={country}
+          activeCategory={activeCategory}
+          onCategoryHover={onCategoryHover}
         />
       )}
     </div>

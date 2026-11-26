@@ -1,26 +1,33 @@
 import * as d3 from "d3";
-import { useState } from "react";
+import { useEffect, useRef } from "react";
 
-export default function DonutChart({ width, height, data, country }) {
-  const [activeCategory, setActiveCategory] = useState(null); // State to track the active category for highlighting
+export default function DonutChart({
+  width,
+  height,
+  data,
+  country,
+  activeCategory,
+  onCategoryHover,
+}) {
+  const slicesRef = useRef(null);
+  const previousCountryRef = useRef(null);
+  const hasRenderedRef = useRef(false);
 
-  // Transform the data into a format suitable for the pie generator, remove zero-value categories
-  const energyMix = [
-    { name: "Coal", value: data.coal },
-    { name: "Oil", value: data.oil },
-    { name: "Gas", value: data.gas },
-    { name: "Nuclear", value: data.nuclear },
-    { name: "Hydro", value: data.hydro },
-    { name: "Solar", value: data.solar },
-    { name: "Wind", value: data.wind },
-    { name: "Biofuel", value: data.biofuel },
-    { name: "Other Renewable", value: data.other_renewable },
-  ].filter((d) => d.value > 0);
+  const keys = [
+    "coal",
+    "oil",
+    "gas",
+    "nuclear",
+    "hydro",
+    "solar",
+    "wind",
+    "biofuel",
+    "other_renewable",
+  ];
 
-  // Set up color scale and pie generator
   const colors = d3
     .scaleOrdinal()
-    .domain(energyMix.map((d) => d.name))
+    .domain(keys)
     .range([
       "#746766",
       "#f73e2d",
@@ -32,104 +39,191 @@ export default function DonutChart({ width, height, data, country }) {
       "#85d29e",
       "#01325a",
     ]);
-  const pieGenerator = d3
+
+  const energyMix = data
+    ? [
+        { name: "Coal", key: "coal", value: data.coal },
+        { name: "Oil", key: "oil", value: data.oil },
+        { name: "Gas", key: "gas", value: data.gas },
+        { name: "Nuclear", key: "nuclear", value: data.nuclear },
+        { name: "Hydro", key: "hydro", value: data.hydro },
+        { name: "Solar", key: "solar", value: data.solar },
+        { name: "Wind", key: "wind", value: data.wind },
+        { name: "Biofuel", key: "biofuel", value: data.biofuel },
+        {
+          name: "Other Renewable",
+          key: "other_renewable",
+          value: data.other_renewable,
+        },
+      ].filter((d) => Number.isFinite(d.value) && d.value > 0)
+    : [];
+
+  const pieData = d3
     .pie()
     .value((d) => d.value)
-    .sort(null);
+    .sort(null)(energyMix);
 
-  // Generate the pie data and arc generator
-  const pieData = pieGenerator(energyMix);
-  // Calculate the radius based on the smaller dimension of the chart
   const radius = Math.min(width, height) / 2 - 30;
 
-  // Create the arc generator for the donut slices
   const arcGenerator = d3
     .arc()
     .innerRadius(radius * 0.55)
     .outerRadius(radius);
 
-  // Expanded arc for the hovered slice
   const activeArcGenerator = d3
     .arc()
     .innerRadius(radius * 0.6)
     .outerRadius(radius + 6);
 
-  // Generate the SVG paths for each slice
-  const slices = pieData.map((slice) => {
-    const isActive = activeCategory === slice.data.name;
+  // Country-change animation and initial rendering.
+  useEffect(() => {
+    if (!slicesRef.current) return;
 
-    // Find the direction in which the slice should move
-    const [centroidX, centroidY] = arcGenerator.centroid(slice);
+    const root = d3.select(slicesRef.current);
 
-    const centroidLength = Math.hypot(centroidX, centroidY) || 1;
+    const isFirstRender = !hasRenderedRef.current;
 
-    // Move the active slice 7 pixels away from the centre
-    const offset = isActive ? 7 : 0;
+    const countryChanged =
+      previousCountryRef.current !== null &&
+      previousCountryRef.current !== country;
 
-    const moveX = (centroidX / centroidLength) * offset;
-    const moveY = (centroidY / centroidLength) * offset;
+    const duration = countryChanged ? 750 : 180;
 
-    return (
-      <g
-        key={slice.data.name}
-        transform={`translate(${moveX}, ${moveY})`}
-        style={{
-          cursor: "pointer",
-        }}
-      >
-        <path
-          d={isActive ? activeArcGenerator(slice) : arcGenerator(slice)}
-          fill={colors(slice.data.name)}
-          stroke={isActive ? "black" : "white"}
-          strokeWidth={isActive ? 0.5 : 2}
-          opacity={activeCategory === null || isActive ? 1 : 0.25}
-          style={{
-            transition: "opacity 180ms ease",
-          }}
-        />
-      </g>
-    );
-  });
-  // Invisible hover areas for detecting slices
-  const sliceHitAreas = pieData.map((slice) => (
-    <path
-      key={`hit-${slice.data.name}`}
-      d={arcGenerator(slice)}
-      fill="transparent"
-      pointerEvents="all"
-      onPointerEnter={() => setActiveCategory(slice.data.name)}
-      onPointerLeave={() => setActiveCategory(null)}
-    />
-  ));
+    const slices = root
+      .selectAll("g.donut-slice")
+      .data(pieData, (d) => d.data.key);
 
-  // Find the currently selected slice
+    // Remove categories that no longer have a value.
+    slices
+      .exit()
+      .interrupt()
+      .transition()
+      .duration(duration)
+      .attr("opacity", 0)
+      .remove();
+
+    // Add new categories.
+    const entering = slices
+      .enter()
+      .append("g")
+      .attr("class", "donut-slice")
+      .attr("opacity", 1);
+
+    entering.append("path");
+
+    const merged = entering.merge(slices);
+
+    merged.each(function (d) {
+      const group = d3.select(this);
+      const path = group.select("path");
+
+      // Draw the complete donut on initial render.
+      if (isFirstRender) {
+        this._current = d;
+
+        path
+          .attr("d", arcGenerator(d))
+          .attr("fill", colors(d.data.key))
+          .attr("stroke", "white")
+          .attr("stroke-width", 2)
+          .attr("opacity", 1);
+
+        group.attr("transform", "translate(0,0)");
+
+        return;
+      }
+
+      // Previous geometry for the transition.
+      const previous = this._current || {
+        ...d,
+        startAngle: (d.startAngle + d.endAngle) / 2,
+        endAngle: (d.startAngle + d.endAngle) / 2,
+      };
+
+      const interpolate = d3.interpolate(previous, d);
+
+      group
+        .interrupt()
+        .transition()
+        .duration(duration)
+        .ease(d3.easeCubicInOut)
+        .tween("donut-shape", () => {
+          return (t) => {
+            const current = interpolate(t);
+
+            this._current = current;
+
+            path
+              .attr("d", arcGenerator(current))
+              .attr("fill", colors(d.data.key));
+          };
+        });
+    });
+
+    // Hover interaction.
+    merged.on("pointerenter", (event, d) => {
+      onCategoryHover(d.data.key);
+    });
+
+    hasRenderedRef.current = true;
+    previousCountryRef.current = country;
+  }, [country, data, width, height]);
+
+  // Independent category highlighting.
+  useEffect(() => {
+    if (!slicesRef.current) return;
+
+    d3.select(slicesRef.current)
+      .selectAll("g.donut-slice")
+      .each(function (d) {
+        const isActive = activeCategory === d.data.key;
+        const current = this._current || d;
+
+        const [cx, cy] = arcGenerator.centroid(current);
+        const length = Math.hypot(cx, cy) || 1;
+        const offset = isActive ? 7 : 0;
+
+        d3.select(this)
+          .interrupt()
+          .attr(
+            "transform",
+            `translate(${(cx / length) * offset}, ${(cy / length) * offset})`,
+          );
+
+        d3.select(this)
+          .select("path")
+          .interrupt()
+          .attr(
+            "d",
+            isActive ? activeArcGenerator(current) : arcGenerator(current),
+          )
+          .attr("stroke", isActive ? "black" : "white")
+          .attr("stroke-width", isActive ? 0.5 : 2)
+          .attr("opacity", activeCategory === null || isActive ? 1 : 0.25);
+      });
+  }, [activeCategory, width, height]);
+
   const activeSlice = pieData.find(
-    (slice) => slice.data.name === activeCategory,
+    (slice) => slice.data.key === activeCategory,
   );
 
-  // Calculate total energy represented in the donut
   const totalEnergy = d3.sum(energyMix, (d) => d.value);
 
-  // Calculate selected category's percentage
   const activeShare = activeSlice
     ? (activeSlice.data.value / totalEnergy) * 100
     : 0;
 
-  const formatValue = d3.format(",.1f"); // Format values with one decimal place and commas
+  const formatValue = d3.format(",.1f");
 
-  // Render the SVG with the donut chart and center text
   return (
-    <svg width={width} height={height}>
-      <g
-        transform={`translate(
-        ${width / 2},
-        ${height / 2}
-      )`}
-      >
-        {slices}
-        {sliceHitAreas}
+    <svg
+      width={width}
+      height={height}
+      onPointerLeave={() => onCategoryHover(null)}
+    >
+      <g transform={`translate(${width / 2}, ${height / 2})`}>
+        <g ref={slicesRef} />
 
-        {/* Category name or country name */}
         <text
           y={-12}
           textAnchor="middle"
@@ -140,7 +234,6 @@ export default function DonutChart({ width, height, data, country }) {
           {activeSlice ? `${activeSlice.data.name} · ${country}` : country}
         </text>
 
-        {/* Category value or total energy */}
         <text
           y={10}
           textAnchor="middle"
@@ -150,10 +243,9 @@ export default function DonutChart({ width, height, data, country }) {
         >
           {activeSlice
             ? `${formatValue(activeSlice.data.value)} TWh`
-            : `${data.primary_energy?.toFixed(0)} TWh`}
+            : `${data?.primary_energy?.toFixed(0)} TWh`}
         </text>
 
-        {/* Category share or year */}
         <text y={30} textAnchor="middle" fontSize={10} fill="#6B7280">
           {activeSlice ? `${activeShare.toFixed(1)}% of mix` : "2024"}
         </text>

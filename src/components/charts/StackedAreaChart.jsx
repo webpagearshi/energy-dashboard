@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Tooltip from "./Tooltip";
 
 export default function StackedAreaChart({
@@ -10,10 +10,13 @@ export default function StackedAreaChart({
   onCategoryHover,
   country,
 }) {
-  const svgRef = useRef(null); // Reference to the SVG element
-  const plotRef = useRef(null); // Reference to the plot area (where the areas are drawn)
+  const svgRef = useRef(null);
+  const plotRef = useRef(null);
+  const pathRefs = useRef({});
+  const previousDataRef = useRef(null);
+  const previousCountryRef = useRef(null);
 
-  const [activeMarker, setActiveMarker] = useState(null); // State to track the active marker for tooltip display
+  const [activeMarker, setActiveMarker] = useState(null);
 
   const margin = {
     top: 20,
@@ -25,7 +28,6 @@ export default function StackedAreaChart({
   const boundsWidth = width - margin.left - margin.right;
   const boundsHeight = height - margin.top - margin.bottom;
 
-  // Energy source keys
   const keys = [
     "coal",
     "oil",
@@ -38,37 +40,34 @@ export default function StackedAreaChart({
     "other_renewable",
   ];
 
-  // Color scale
-  const colors = d3.scaleOrdinal().domain(keys).range([
-    "#746766", // Coal
-    "#f73e2d", // Oil
-    "#fd8c40", // Gas
-    "#a3d0fd", // Nuclear
-    "#2173fd", // Hydro
-    "#fff0d6", // Solar
-    "#e0f1a1", // Wind
-    "#85d29e", // Biofuel
-    "#01325a", // Other Renewable
-  ]);
+  const colors = d3
+    .scaleOrdinal()
+    .domain(keys)
+    .range([
+      "#746766",
+      "#f73e2d",
+      "#fd8c40",
+      "#a3d0fd",
+      "#2173fd",
+      "#fff0d6",
+      "#e0f1a1",
+      "#85d29e",
+      "#01325a",
+    ]);
 
-  // Sort data by year
   const sortedData = [...data].sort((a, b) => a.year - b.year);
 
-  // Stack the data
   const stackedSeries = d3.stack().keys(keys)(sortedData);
 
-  // X Scale
   const xScale = d3
     .scaleLinear()
     .domain(d3.extent(sortedData, (d) => d.year))
     .range([0, boundsWidth]);
 
-  // Y Scale
   const maxY = d3.max(stackedSeries, (layer) => d3.max(layer, (d) => d[1]));
 
   const yScale = d3.scaleLinear().domain([0, maxY]).range([boundsHeight, 0]);
 
-  // Area generator
   const areaGenerator = d3
     .area()
     .x((d) => xScale(d.data.year))
@@ -76,62 +75,134 @@ export default function StackedAreaChart({
     .y1((d) => yScale(d[1]))
     .curve(d3.curveMonotoneX);
 
-  // Handle mouse movement over the chart
+  /*
+   * Animate the stacked areas when the country changes.
+   * Interpolate the actual stacked values rather than
+   * morphing the old path using the new country's scale.
+   */
+  useEffect(() => {
+    const previousData = previousDataRef.current;
+    const previousCountry = previousCountryRef.current;
+
+    const countryChanged =
+      previousCountry !== null && previousCountry !== country;
+
+    if (countryChanged && previousData) {
+      const previousSortedData = [...previousData].sort(
+        (a, b) => a.year - b.year,
+      );
+
+      const previousStackedSeries = d3.stack().keys(keys)(previousSortedData);
+
+      const currentStackedSeries = d3.stack().keys(keys)(sortedData);
+
+      const previousSeriesMap = new Map(
+        previousStackedSeries.map((series) => [series.key, series]),
+      );
+
+      const currentSeriesMap = new Map(
+        currentStackedSeries.map((series) => [series.key, series]),
+      );
+
+      keys.forEach((key) => {
+        const path = pathRefs.current[key];
+
+        const previousSeries = previousSeriesMap.get(key);
+        const currentSeries = currentSeriesMap.get(key);
+
+        if (!path || !previousSeries || !currentSeries) {
+          return;
+        }
+
+        const previousByYear = new Map(
+          previousSeries.map((point) => [point.data.year, point]),
+        );
+
+        const interpolators = currentSeries.map((currentPoint) => {
+          const previousPoint = previousByYear.get(currentPoint.data.year);
+
+          if (!previousPoint) {
+            return d3.interpolate([0, 0], [currentPoint[0], currentPoint[1]]);
+          }
+
+          return d3.interpolate(
+            [previousPoint[0], previousPoint[1]],
+            [currentPoint[0], currentPoint[1]],
+          );
+        });
+
+        d3.select(path)
+          .interrupt()
+          .transition()
+          .duration(700)
+          .ease(d3.easeCubicInOut)
+          .attrTween("d", () => {
+            return (t) => {
+              const interpolatedSeries = currentSeries.map((point, index) => {
+                const values = interpolators[index](t);
+
+                return {
+                  ...point,
+                  0: values[0],
+                  1: values[1],
+                };
+              });
+
+              return areaGenerator(interpolatedSeries);
+            };
+          });
+      });
+    }
+
+    previousDataRef.current = sortedData;
+    previousCountryRef.current = country;
+  }, [country, data, width, height]);
+
+  // Clear the tooltip marker when the country changes.
+  useEffect(() => {
+    setActiveMarker(null);
+  }, [country]);
+
   const handleMouseMove = (event) => {
-    // Get cursor coordinates relative to the plotting area
     const [mouseX, mouseY] = d3.pointer(event, plotRef.current);
 
-    // Convert horizontal pixel position into a year
     const xValue = xScale.invert(mouseX);
 
-    // Find the closest year
     const nearestIndex = d3.bisector((d) => d.year).center(sortedData, xValue);
 
-    // Retrieve the complete data record for that year
     const nearestPoint = sortedData[nearestIndex];
-
-    // Convert vertical pixel position into stacked data value
     const yValue = yScale.invert(mouseY);
 
-    // Find which energy source occupies this position
     const hoveredSeries = stackedSeries.find((series) => {
       const segment = series[nearestIndex];
 
       return yValue >= segment[0] && yValue <= segment[1];
     });
 
-    // No energy source underneath the cursor
     if (!hoveredSeries) {
       onCategoryHover(null);
       setActiveMarker(null);
       return;
     }
 
-    // Get the selected category's stacked boundaries
     const segment = hoveredSeries[nearestIndex];
 
-    // Get cursor coordinates relative to the SVG
     const [svgX, svgY] = d3.pointer(event, svgRef.current);
 
-    // Tooltip dimensions used for positioning
     const tooltipWidth = 190;
     const tooltipHeight = 75;
 
-    // Position tooltip without exceeding chart boundaries
     const xPos = Math.max(8, Math.min(svgX + 14, width - tooltipWidth - 8));
 
     const yPos = Math.max(8, Math.min(svgY + 14, height - tooltipHeight - 8));
 
-    // Make the category name readable
     const name = hoveredSeries.key
       .split("_")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ");
 
-    // Highlight the active category
     onCategoryHover(hoveredSeries.key);
 
-    // Store tooltip and marker information
     setActiveMarker({
       xPos,
       yPos,
@@ -145,7 +216,6 @@ export default function StackedAreaChart({
     });
   };
 
-  // Draw the stacked areas
   const areas = stackedSeries.map((series) => {
     const isActive = activeCategory === series.key;
 
@@ -154,10 +224,16 @@ export default function StackedAreaChart({
     return (
       <path
         key={series.key}
+        ref={(node) => {
+          pathRefs.current[series.key] = node;
+        }}
+        className="energy-area"
         d={areaGenerator(series)}
         fill={colors(series.key)}
         opacity={opacity}
-        style={{ transition: "opacity 180ms ease" }}
+        style={{
+          transition: "opacity 180ms ease",
+        }}
       />
     );
   });
@@ -168,7 +244,6 @@ export default function StackedAreaChart({
         <g ref={plotRef} transform={`translate(${margin.left}, ${margin.top})`}>
           {areas}
 
-          {/* Invisible interaction layer */}
           <rect
             x={0}
             y={0}
@@ -183,7 +258,6 @@ export default function StackedAreaChart({
             }}
           />
 
-          {/* Active data point marker */}
           {activeMarker && (
             <circle
               cx={activeMarker.markerX}
@@ -196,7 +270,6 @@ export default function StackedAreaChart({
             />
           )}
 
-          {/* X Axis */}
           <g
             transform={`translate(0, ${boundsHeight})`}
             ref={(node) => {
@@ -208,7 +281,6 @@ export default function StackedAreaChart({
             }}
           />
 
-          {/* Y Axis */}
           <g
             ref={(node) => {
               if (node) {
@@ -218,6 +290,7 @@ export default function StackedAreaChart({
           />
         </g>
       </svg>
+
       <Tooltip interactionData={activeMarker} />
     </div>
   );
